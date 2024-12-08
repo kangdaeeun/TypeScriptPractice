@@ -1,35 +1,137 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import { getTodos, type Todo } from "./test";
+
+type ToggleTodo = Omit<Todo, "title">;
 
 function App() {
-  const [count, setCount] = useState(0)
+  // 비동기적으로 사용하기
+  const [todoList, setTodoList] = useState<Todo[]>([]);
+  useEffect(() => {
+    getTodos().then((data) => setTodoList(data));
+  }, []);
+
+  const [title, setTitle] = useState("");
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
+
+  const handleAddTodo = async () => {
+    // 유효성 검사
+    if (title === "") {
+      return;
+    }
+
+    const newTodo: Todo = {
+      id: crypto.randomUUID(),
+      title,
+      completed: false,
+    };
+
+    await fetch("http://localhost:4000/todos", {
+      method: "POST",
+      body: JSON.stringify(newTodo),
+    });
+
+    setTodoList((prev) => [...prev, newTodo]);
+    setTitle("");
+  };
+
+  const handleDeleteTodo = async (id: Todo["id"]) => {
+    await fetch(`http://localhost:4000/todos/${id}`, {
+      method: "DELETE",
+    });
+
+    setTodoList((prev) => prev.filter((todo) => todo.id !== id));
+  };
+
+  // (객체로)첫번째 인자에 객체로 받아온 함수를 만들어주고
+  // 하나만 제거하는 유틸리티 타입 Omit을 사용
+  const handleToggleTodo = async ({ id, completed }: ToggleTodo) => {
+    await fetch(`http://localhost:4000/todos/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        completed: !completed,
+      }),
+    });
+    setTodoList((prev) =>
+      prev.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            completed: !completed,
+          };
+        }
+        return todo;
+      })
+    );
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <TodoList
+        todoList={todoList}
+        onDeleteClick={handleDeleteTodo}
+        onToggleClick={handleToggleTodo}
+      />
+      <input type="text" value={title} onChange={handleTitleChange} />
+      <button onClick={handleAddTodo}>등록</button>
     </>
-  )
+  );
 }
 
-export default App
+type TodoListProps = {
+  todoList: Todo[];
+  onDeleteClick: (id: Todo["id"]) => void;
+  onToggleClick: (toggleTodo: ToggleTodo) => void;
+};
+function TodoList({ todoList, onDeleteClick, onToggleClick }: TodoListProps) {
+  return (
+    <div>
+      {todoList.map((todo) => (
+        <TodoItem
+          key={todo.id}
+          {...todo}
+          onDeleteClick={onDeleteClick}
+          onToggleClick={onToggleClick}
+        />
+      ))}
+    </div>
+  );
+}
+
+type TodoItemProps = Todo & {
+  onDeleteClick: (id: Todo["id"]) => void;
+  onToggleClick: (toggleTodo: ToggleTodo) => void;
+};
+function TodoItem({
+  id,
+  title,
+  completed,
+  onDeleteClick,
+  onToggleClick,
+}: TodoItemProps) {
+  return (
+    <>
+      <div>
+        <div>id: {id}</div>
+        <div
+          onClick={() =>
+            onToggleClick({
+              id,
+              completed,
+            })
+          }
+        >
+          title: {title}
+        </div>
+        <div>completed: {`${completed}`}</div>
+        <button onClick={() => onDeleteClick(id)}>삭제</button>
+      </div>
+      ---
+    </>
+  );
+}
+
+export default App;
