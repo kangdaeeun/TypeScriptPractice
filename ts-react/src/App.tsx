@@ -8,7 +8,7 @@ function App() {
   // 비동기적으로 사용하기
   const [todoList, setTodoList] = useState<Todo[]>([]);
   useEffect(() => {
-    getTodos().then((data) => setTodoList(data));
+    getTodos().then((data) => setTodoList(data.data));
   }, []);
 
   const [title, setTitle] = useState("");
