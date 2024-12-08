@@ -1,13 +1,8 @@
 {
   "todos": [
     {
-      "id": "d3",
-      "title": "title",
-      "completed": false
-    },
-    {
-      "id": "553af78e-358f-48ef-8972-fcd0bedf4388",
-      "title": "dddd",
+      "id": "755d9918-93a1-4ba2-a9e3-29a2140adbd6",
+      "title": "todo",
       "completed": false
     }
   ]
