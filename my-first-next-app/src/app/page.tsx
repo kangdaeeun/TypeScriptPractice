@@ -1,3 +1,16 @@
-export default function Home() {
-  return <div>안녕 Next.js 야</div>;
+"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function Test() {
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    setTimeout(() => {
+      // router.push, router.replace, router.back, router.reload
+      router.push("/test");
+    }, 1000);
+  };
+
+  return <button onClick={handleButtonClick}>클릭!</button>;
 }
