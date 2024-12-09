@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-
 type Props = {
   params: {
     id: string;
@@ -17,9 +16,14 @@ export const generateMetadata = ({ params }: Props) => {
 
 const AboutPage = () => {
   return (
-    <>
-      <Link href={"/about2"}>go about2</Link>
-    </>
+    <div className="">
+      <div>
+        <Link href={"/about2"}>go about2</Link>
+      </div>
+      <div>
+        <Link href={"/"}>go home</Link>
+      </div>
+    </div>
   );
 };
 
